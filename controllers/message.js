@@ -39,36 +39,30 @@ exports.getMessages = async (req, res, next) => {
   const userMessage = await User.findById(user_Id);
   const friendMessage = await User.findById(friend_Id);
 
-  let ourMessages = [];
-  userMessage.receivedMessages.map((userReceivedmessage, index) => {
-    friendMessage.sentMessages.map((friendSentmessage) => {
-      userMessage.sentMessages.map((userSentMessage) => {
-        friendMessage.receivedMessages.map((friendReceivedMessage) => {
-          if (
-            userReceivedmessage === friendSentmessage &&
-            userSentMessage === friendReceivedMessage
-          ) {
-            let getAllOurMessages = getAllMessages.filter(
-              (getOurMessage) =>
-                getOurMessage._id !== userReceivedmessage &&
-                getOurMessage._id !== friendReceivedMessage
-            );
-            console.log(getAllOurMessages);
-            // ourMessages.push(userReceivedmessage, friendReceivedMessage);
-            try {
-              res.status(200).json({
-                message: "All messages found",
-                data: {
-                  getAllOurMessages,
-                },
-              });
-            } catch (err) {
-              next(err);
-            }
-          }
-        });
-      });
+  let getAllOurMessages;
+  friendMessage.sentMessages.map((friendSentmessage, i) => {
+    userMessage.sentMessages.map((userSentMessage, index) => {
+      if (
+        userMessage.receivedMessages[i] === friendSentmessage &&
+        userSentMessage === friendMessage.receivedMessages[index]
+      ) {
+        getAllOurMessages = getAllMessages.filter(
+          (getOurMessage) =>
+            getOurMessage._id !== userMessage.receivedMessages[i] &&
+            getOurMessage._id !== friendMessage.receivedMessages[index]
+        );
+      }
     });
   });
-  console.log("our messages is ", ourMessages);
+  console.log("All our convo ",getAllOurMessages);
+  try {
+    res.status(200).json({
+      message: "All messages found",
+      data: {
+        getAllOurMessages,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 };
