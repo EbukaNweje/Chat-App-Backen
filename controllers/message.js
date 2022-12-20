@@ -1,5 +1,31 @@
+const express = require("express");
 const Message = require("../models/message.js");
 const User = require("../models/user.js");
+
+const app = express();
+
+// const http = require("http");
+// const server = http.createServer(app);
+// const { Server } = require("socket.io");
+// const io = new Server(server);
+
+// app.get("/", (req, res) => {
+//   res.sendFile(__dirname + "/index.html");
+// });
+
+// //for post request this can be used
+// io.on("connection", (socket) => {
+//   socket.on("chat message", (msg) => {
+//     console.log("message: " + msg);
+//   });
+// });
+
+// //for get request, this can be used here
+// io.on("connection", (socket) => {
+//   socket.on("chat message", (msg) => {
+//     io.emit("chat message", msg);
+//   });
+// });
 
 exports.createMessage = async (req, res, next) => {
   const friend_Id = req.params.friendId;
@@ -7,7 +33,7 @@ exports.createMessage = async (req, res, next) => {
   console.log(req.body);
   const { message } = req.body;
   try {
-    const savedMessage = await Message.create({
+    const savedMessage = new Message({
       message,
       userId: user_Id,
     });
@@ -21,11 +47,15 @@ exports.createMessage = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
-    res.status(201).json({
-      message: "Created successfully",
-      data: {
-        savedMessage,
-      },
+    savedMessage.save((err) => {
+      if (err) sendStatus(500);
+      // io.emit("message", req.body);
+      res.status(201).json({
+        message: "Created successfully",
+        data: {
+          savedMessage,
+        },
+      });
     });
   } catch (err) {
     next(err);
@@ -39,27 +69,34 @@ exports.getMessages = async (req, res, next) => {
   const userMessage = await User.findById(user_Id);
   const friendMessage = await User.findById(friend_Id);
 
-  let getAllOurMessages;
-  friendMessage.sentMessages.map((friendSentmessage, i) => {
-    userMessage.sentMessages.map((userSentMessage, index) => {
-      if (
-        userMessage.receivedMessages[i] === friendSentmessage &&
-        userSentMessage === friendMessage.receivedMessages[index]
-      ) {
-        getAllOurMessages = getAllMessages.filter(
-          (getOurMessage) =>
-            getOurMessage._id !== userMessage.receivedMessages[i] &&
-            getOurMessage._id !== friendMessage.receivedMessages[index]
-        );
-      }
-    });
-  });
-  console.log("All our convo ",getAllOurMessages);
+  let gottenMessage = [];
+  userMessage.sentMessages.map((userSentMessage) =>
+    friendMessage.receivedMessages.map((friendReceivedMessage) =>
+        getAllMessages.map((getOurMessage) => {
+          if (userSentMessage === friendReceivedMessage ) {
+            if (
+              getOurMessage._id.toString() === friendReceivedMessage ||
+              getOurMessage._id.toString() === userSentMessage
+              )
+            return gottenMessage.push(getOurMessage);
+          }
+        }
+    )
+    )
+  );
+  //here, i try to remove duplicates... but I need to optimise this function cos of too much loops
+  const UserFriendMessages = gottenMessage.filter((value, index, self) =>
+  index === self.findIndex((t) => (
+    t.message === value.message
+  ))
+)
+console.log("My t ", UserFriendMessages)
+
   try {
     res.status(200).json({
       message: "All messages found",
       data: {
-        getAllOurMessages,
+        UserFriendMessages,
       },
     });
   } catch (err) {
