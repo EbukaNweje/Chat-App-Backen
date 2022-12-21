@@ -1,6 +1,7 @@
 const express = require("express");
 const Message = require("../models/message.js");
 const User = require("../models/user.js");
+const createError = require("../utils/error.js");
 
 const app = express();
 
@@ -128,6 +129,13 @@ exports.getMessages = async (req, res, next) => {
 exports.deleteMessage = async (req, res, next) => {
   const friend_Id = req.params.friendId;
   const user_Id = req.params.id;
+  const findMessage = await Message.findById(req.params.messageId);
+  if (findMessage === null) {
+    const error = new Error();
+    error.status = 404;
+    error.message = "Message not found";
+    return next(error);
+  }
   try {
     try {
       await User.findByIdAndUpdate(user_Id, {
@@ -147,4 +155,3 @@ exports.deleteMessage = async (req, res, next) => {
     next(error);
   }
 };
-
