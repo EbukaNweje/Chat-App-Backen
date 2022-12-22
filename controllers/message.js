@@ -1,7 +1,7 @@
 const express = require("express");
 const Message = require("../models/message.js");
 const User = require("../models/user.js");
-const createError = require("../utils/error.js");
+const errors = require("../utils/error.js");
 
 const app = express();
 
@@ -112,7 +112,6 @@ exports.getMessages = async (req, res, next) => {
     (value, index, self) =>
       index === self.findIndex((t) => t.message === value.message)
   );
-  console.log("My t ", UserFriendMessages);
 
   try {
     res.status(200).json({
@@ -130,12 +129,7 @@ exports.deleteMessage = async (req, res, next) => {
   const friend_Id = req.params.friendId;
   const user_Id = req.params.id;
   const findMessage = await Message.findById(req.params.messageId);
-  if (findMessage === null) {
-    const error = new Error();
-    error.status = 404;
-    error.message = "Message not found";
-    return next(error);
-  }
+  if (findMessage === null) return next(errors.createError(404, "Message not found"));
   try {
     try {
       await User.findByIdAndUpdate(user_Id, {
@@ -150,6 +144,32 @@ exports.deleteMessage = async (req, res, next) => {
     await Message.findByIdAndDelete(req.params.messageId);
     res.status(200).json({
       message: "Successfully deleted Message!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateMessage = async (req, res, next) => {
+  const user_Id = req.params.id;
+  const userMessage = await User.findById(user_Id);
+  const getAllMessages = await Message.findById(req.params.messageId);
+
+  if (!userMessage) return next(errors.createError(404, "User not found"))
+  const messageIdToBeUpdated = userMessage.sentMessages.map((userSentMessage) => {
+    if(getAllMessages._id.toString() === userSentMessage) {
+      return userSentMessage
+    }
+  })
+  try {
+    const updatedRoom = await Message.findByIdAndUpdate(messageIdToBeUpdated[0], req.body, {
+      new: true,
+    });
+    res.status(200).json({
+      message: "Successfully updated",
+      data: {
+        updatedRoom,
+      },
     });
   } catch (error) {
     next(error);
