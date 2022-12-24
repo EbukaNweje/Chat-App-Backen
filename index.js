@@ -20,7 +20,6 @@ const app = express();
 
 app.use(express.json());
 
-
 dotenv.config({ path: "./utils/.env" });
 
 const DB = process.env.DATABASE;
