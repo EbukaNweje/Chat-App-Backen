@@ -32,7 +32,7 @@ mongoose
   .then(() => console.log("Db connect success!!"));
 
 app.use("/api/messages", messageRoute);
-app.use("/api/users", userRoute);
+// app.use("/api/users", userRoute);
 
 // res.sendFile(__dirname + "/index.html");
 
