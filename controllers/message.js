@@ -1,6 +1,6 @@
 const express = require("express");
 const Message = require("../models/message.js");
-// const User = require("../models/user.js");
+const User = require("../models/user.js");
 const errors = require("../utils/error.js");
 
 const app = express();
@@ -31,7 +31,6 @@ const app = express();
 exports.createMessage = async (req, res, next) => {
   const friend_Id = req.params.friendId;
   const user_Id = req.params.id;
-  console.log(req.body);
   const { message } = req.body;
   try {
     const savedMessage = new Message({
@@ -50,7 +49,6 @@ exports.createMessage = async (req, res, next) => {
     }
     savedMessage.save((err) => {
       if (err) sendStatus(500);
-      // io.emit("message", req.body);
       res.status(201).json({
         message: "Created successfully",
         data: {
@@ -156,11 +154,15 @@ exports.updateMessage = async (req, res, next) => {
   const getAllMessages = await Message.findById(req.params.messageId);
 
   if (!userMessage) return next(errors.createError(404, "User not found"))
-  const messageIdToBeUpdated = userMessage.sentMessages.map((userSentMessage) => {
-    if(getAllMessages._id.toString() === userSentMessage) {
-      return userSentMessage
-    }
-  })
+  if (!getAllMessages) return next(errors.createError(404, "Message not found"))
+
+  const messageIdToBeUpdated = userMessage.sentMessages.filter((userSentMessage) => userSentMessage === getAllMessages._id.toString()
+    // if(getAllMessages._id.toString() === userSentMessage) {
+    //   console.log(userSentMessage)
+    //   return userSentMessage
+    // }
+  )
+  console.log(messageIdToBeUpdated)
   try {
     const updatedRoom = await Message.findByIdAndUpdate(messageIdToBeUpdated[0], req.body, {
       new: true,
