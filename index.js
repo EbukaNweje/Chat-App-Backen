@@ -25,6 +25,7 @@ mongoose
   .then(() => console.log('Db connect success!!'))
   .catch((error) => console.log(error))
 
+  //Implemented mongodb streams and also with sockect.io
 const db = mongoose.connection
 db.on('open', () => {
   const observer = db.collection('messages').watch()
@@ -35,21 +36,22 @@ db.on('open', () => {
         message: change.fullDocument.message,
         _id: change.fullDocument._id,
       }
-      io.emit('ourChat', newMessage)
+      io.emit('insert', newMessage)
     }
     if (change.operationType === 'update') {
-      const updateMessage ={
+      const updateMessage = {
         message: change.updateDescription.updatedFields.message,
         updatedAt: change.updateDescription.updatedFields.updatedAt,
       }
       console.log(updateMessage)
-      io.emit('dispatch', updateMessage)
-    }
-    else{
-      console.log("error from emitting")
+      io.emit('patch', updateMessage)
+    } else {
+      console.log('No change')
     }
   })
 })
+
+//create connection
 io.on('connection', (socket) => {
   console.log('socket connected', socket.id)
 
@@ -66,7 +68,6 @@ app.use('/api/messages', messageRoute)
 app.use('/api/users', userRoute)
 
 // res.sendFile(__dirname + "/index.html");
-
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500
   const errorMessage = err.message || 'something went wrong'
