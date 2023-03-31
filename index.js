@@ -9,12 +9,15 @@ const server = http.createServer(app)
 
 const messageRoute = require('./routes/message.js')
 const userRoute = require('./routes/user.js')
+const authRoute = require('./routes/auth')
 
 app.use(express.json())
 
 dotenv.config({ path: './utils/.env' })
 
 const DB = process.env.DATABASE
+
+//Making use of socket.io event emitter
 const io = new Server(server, { cors: { origin: '*' } })
 
 mongoose.set('strictQuery', false)
@@ -66,6 +69,7 @@ io.on('connection', (socket) => {
 
 app.use('/api/messages', messageRoute)
 app.use('/api/users', userRoute)
+app.use('/api/users', authRoute)
 
 // res.sendFile(__dirname + "/index.html");
 app.use((err, req, res, next) => {
@@ -79,6 +83,7 @@ app.use((err, req, res, next) => {
   })
 })
 
-app.listen(process.env.PORT || 500, () => {
+app.listen(process.env.PORT || 500, (error) => {
+  if(error) console.log(error)
   console.log('🌎 connected')
 })

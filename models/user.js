@@ -10,9 +10,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "An email is required"],
     },
+    phoneNumber: {
+      type: Number,
+      required: [true, "A phone Number is required"],
+    },
     password: {
       type: String,
       required: [true, "A password is required"],
+    },
+    confirmPassword: {
+      type: String,
+      required: [true, "A confirmation password is required"],
+    },
+    token: {
+      type: String,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
     },
     receivedMessages: {
       type: [String],

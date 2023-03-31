@@ -5,28 +5,6 @@ const errors = require("../utils/error.js");
 
 const app = express();
 
-// const http = require("http");
-// const server = http.createServer(app);
-// const { Server } = require("socket.io");
-// const io = new Server(server);
-
-// app.get("/", (req, res) => {
-//   res.sendFile(__dirname + "/index.html");
-// });
-
-// //for post request this can be used
-// io.on("connection", (socket) => {
-//   socket.on("chat message", (msg) => {
-//     console.log("message: " + msg);
-//   });
-// });
-
-// //for get request, this can be used here
-// io.on("connection", (socket) => {
-//   socket.on("chat message", (msg) => {
-//     io.emit("chat message", msg);
-//   });
-// });
 
 exports.createMessage = async (req, res, next) => {
   const friend_Id = req.params.friendId;
