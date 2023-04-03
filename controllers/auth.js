@@ -80,23 +80,24 @@ exports.registerUser = async (req, res, next) => {
 }
 
 exports.verifyUser = async (req, res, next) => {
-  const { userId, token } = req.params
-  console.log(userId)
+  const { userId, token } = req.params;
+  console.log(userId);
   try {
-    const userToBeVerified = await User.findById(userId)
-    if (!userToBeVerified)
-      return next(createError(401, { Message: 'User Not found' }))
-    if (userToBeVerified.token !== token)
-      return next(createError(401, { Message: 'Invalid token' }))
+    const userToBeVerified = await User.findById(userId);
+    if (!userToBeVerified) {
+      throw createError(401, 'User not found');
+    }
+    if (userToBeVerified.token !== token) {
+      throw createError(401, 'Invalid token');
+    }
 
-    userToBeVerified.verify = true
-    await userToBeVerified.save()
+    userToBeVerified.verified = true;
+    await userToBeVerified.save();
 
-    return res.status(200).json({
-      Message: 'verified successfully!',
-      userVerified: userToBeVerified.verify,
-    })
+    res.redirect(`http://localhost:3000/users/verifyuser/${userToBeVerified._id}`);
   } catch (error) {
-    next(err)
+    next(error);
   }
-}
+};
+
+
