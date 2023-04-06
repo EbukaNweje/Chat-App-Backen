@@ -100,4 +100,14 @@ exports.verifyUser = async (req, res, next) => {
   }
 };
 
+exports.login = async (req, res, next) => {
+  const { userName, password, confirmPassword } = req.body;
 
+    if (password !== confirmPassword) return next(createError(400, 'Passwords do not match'))
+  try {
+    
+
+  } catch (error) {
+    next(error);
+  }
+};
