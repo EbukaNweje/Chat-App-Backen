@@ -105,7 +105,18 @@ exports.login = async (req, res, next) => {
 
     if (password !== confirmPassword) return next(createError(400, 'Passwords do not match'))
   try {
-    
+    const userEmail = req.body.email.toLowerCase()
+    const user = await User.findOne({ email: userEmail });
+    if (!user) return next(createError(404, "User not found"));
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
+    if (!isPasswordCorrect)
+    return next(createError(400, "Incorrect username or password"));
+  const token = jwt.sign({ id: user._id }, process.env.JWT, {
+    expiresIn: "3d",
+  });
 
   } catch (error) {
     next(error);
