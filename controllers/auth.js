@@ -101,22 +101,22 @@ exports.verifyUser = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  const { userName, password, confirmPassword } = req.body;
+  const { email, password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) return next(createError(400, 'Passwords do not match'))
   try {
-    const userEmail = req.body.email.toLowerCase()
+    const userEmail = email.toLowerCase()
     const user = await User.findOne({ email: userEmail });
     if (!user) return next(createError(404, "User not found"));
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
     );
-    if (!isPasswordCorrect)
-    return next(createError(400, "Incorrect username or password"));
-  const token = jwt.sign({ id: user._id }, process.env.JWT, {
-    expiresIn: "3d",
-  });
+        if (!isPasswordCorrect)
+      return next(createError(400, "Incorrect username or password"));
+    const token = jwt.sign({ id: user._id }, process.env.JWT, {
+      expiresIn: "3d",
+    });
 
   } catch (error) {
     next(error);
